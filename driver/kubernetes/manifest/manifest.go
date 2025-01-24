@@ -251,6 +251,8 @@ func NewDeployment(opt *DeploymentOpt) (d *appsv1.Deployment, c []*corev1.Config
 }
 
 func toRootless(d *appsv1.Deployment) error {
+	userid := int64(1000)
+	runAsNonRoot := true
 	d.Spec.Template.Spec.Containers[0].Args = append(
 		d.Spec.Template.Spec.Containers[0].Args,
 		"--oci-worker-no-process-sandbox",
@@ -259,6 +261,9 @@ func toRootless(d *appsv1.Deployment) error {
 		SeccompProfile: &corev1.SeccompProfile{
 			Type: corev1.SeccompProfileTypeUnconfined,
 		},
+		RunAsNonRoot: &runAsNonRoot,
+		RunAsUser: &userid,
+		RunAsGroup: &userid,
 	}
 	if d.Spec.Template.ObjectMeta.Annotations == nil {
 		d.Spec.Template.ObjectMeta.Annotations = make(map[string]string, 1)
